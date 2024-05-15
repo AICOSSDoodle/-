@@ -12,6 +12,7 @@ def remove_special_characters(text):
 
 
 def delete_existing_files(directory):        ----------------> 기존 _cleand3.txt 말고 모든 파일 삭제
+
     for filename in os.listdir(directory):
         if filename.endswith("_cleaned3.txt"):
             pass
