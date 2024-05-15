@@ -1,0 +1,56 @@
+import os
+
+def split_text(text, max_length=5000):
+    chunks = []
+    current_chunk = ""
+    words = text.split()
+    for word in words:
+        if len(current_chunk) + len(word) + 1 <= max_length:
+            current_chunk += word + " "
+        else:
+            if word.endswith("요.") or word.endswith("다."):
+                chunks.append(current_chunk.strip())
+                current_chunk = word + " "
+            else:
+                last_good_end = current_chunk.rfind("요.")
+                if last_good_end == -1:
+                    last_good_end = current_chunk.rfind("다.")
+                if last_good_end != -1:
+                    chunks.append(current_chunk[:last_good_end+1].strip())
+                    current_chunk = current_chunk[last_good_end+2:] + word + " "
+                else:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = word + " "
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    return chunks
+
+def split_text_file(input_file, output_directory, max_length=5000):
+    with open(input_file, 'r', encoding='utf-8') as f:
+        text = f.read()
+        file_count = 1
+        base_name = os.path.basename(input_file).split('.')[0]
+        chunks = split_text(text, max_length)
+        for chunk in chunks:
+            output_file_path = os.path.join(output_directory, f'{base_name}_output_{file_count}.txt')
+            with open(output_file_path, 'w', encoding='utf-8') as output_file:
+                output_file.write(chunk)
+            file_count += 1
+
+def process_files_by_name_part(input_directory, output_directory):
+    os.makedirs(output_directory, exist_ok=True)
+    for dirpath, dirnames, filenames in os.walk(input_directory):
+        for filename in filenames:
+            if filename.endswith('.txt'):
+                relative_path = os.path.relpath(dirpath, input_directory)
+                output_folder_name = f"{relative_path}_output"
+                file_output_directory = os.path.join(output_directory, output_folder_name)
+                os.makedirs(file_output_directory, exist_ok=True)
+                input_path = os.path.join(dirpath, filename)
+                split_text_file(input_path, file_output_directory)
+
+input_directory = r"C:\path\to\input_directory"
+output_directory = r"C:\path\to\output_directory"
+
+process_files_by_name_part(input_directory, output_directory)
+print("All files have been processed.")

@@ -1,0 +1,53 @@
+!pip install torch torchvision
+
+import torch
+from transformers import BertTokenizer
+from unicodedata import normalize
+
+# KR-BERT의 토큰화를 위한 tokenizer 생성
+#tokenizer_krbert = BertTokenizer.from_pretrained('/content/drive/MyDrive/krbert/vocab.txt', do_lower_case=False)
+tokenizer_krbert = BertTokenizer.from_pretrained('snunlp/KR-BERT-char16424', do_lower_case=False)
+# 입력 문장을 음절 하위 문자로 변환하는 함수
+def to_subchar(string):
+    return normalize('NFKD', string)
+def to_syllable(string):
+    return normalize('NFKD', string)
+# 예시 문장
+sentence = '토크나이저 예시입니다.'
+
+# 음절 하위 문자로 토큰화
+
+tokens1 = tokenizer_krbert.tokenize(to_subchar(sentence))
+tokens2 = tokenizer_krbert.tokenize(to_syllable(sentence))
+print(tokens1)
+print(tokens2)
+
+def tokenize_text_file(input_file):
+    with open(input_file, 'r', encoding='utf-8') as f:
+      lines = f.readlines()
+      h=[]
+      for line in lines:
+        tokens = tokenizer_krbert.tokenize(to_subchar(line))
+        h.append(tokens)
+      
+      return h
+
+
+
+directory = "/content/drive/MyDrive/TS7경제_3/DGBDB21000001_cleaned_cleaned__cleaned2.txt"
+
+texttt = tokenize_text_file(directory)
+print(texttt)
+with open("DGBDB21000001_tokenized.txt", 'w', encoding='utf-8') as output_file:
+  for i in texttt:
+    g=[]
+    for j in range(len(i)):
+      if "#" in i[j]:
+        i[j].replace("#","")
+      g=" ".join(i)
+    output_file.write(g)
+
+print("처리완료")
+
+
+
